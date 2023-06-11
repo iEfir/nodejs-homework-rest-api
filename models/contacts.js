@@ -21,7 +21,7 @@ const getContactById = async (contactId) => {
 
     const contactMatch = parseData.find((contact) => contact.id === contactId);
 
-    return contactMatch;
+    return contactMatch || null;
   } catch (err) {
     console.log(err);
   }
@@ -41,9 +41,6 @@ const removeContact = async (contactId) => {
     const refreshedList = JSON.stringify(filtredContacts);
 
     await fs.writeFile(contactsPath, refreshedList);
-
-    console.log(`Contact ${contactMatch.name} has been deleted successfully`);
-    listContacts();
   } catch (err) {
     console.log(err);
   }
@@ -81,10 +78,7 @@ const updateContact = async (id, body) => {
     const index = parseData.findIndex((item) => item.id === id);
 
     if (index === -1) {
-      return {
-        status: 400,
-        message: "missing fields",
-      };
+      return null;
     }
     parseData[index] = { id, ...body };
     await fs.writeFile(contactsPath, JSON.stringify(parseData, null, 2));
