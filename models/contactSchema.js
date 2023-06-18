@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 const Joi = require("joi");
-// const { handleMongooseError } = require("../helpers/index");
+const { handleMongooseError } = require("../helpers/index");
 
 const dateRegexp = /^\(\d{3}\) \d{3}-\d{4}$/;
 
@@ -25,7 +25,7 @@ const contactSchema = new Schema(
   { versionKey: false, timestamps: true }
 );
 
-// contactSchema.post("save", handleMongooseError);
+contactSchema.post("save", handleMongooseError);
 
 const addSchema = Joi.object({
   name: Joi.string()
@@ -53,7 +53,11 @@ const addSchema = Joi.object({
 });
 
 const updateFavoriteSchema = Joi.object({
-  favorite: Joi.boolean().required(),
+  favorite: Joi.boolean()
+    .messages({
+      "any.required": `missing field favorite`,
+    })
+    .required(),
 });
 
 const schemas = {
