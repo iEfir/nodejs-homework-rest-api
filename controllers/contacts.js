@@ -1,14 +1,22 @@
-const { Contact } = require("../models/contactSchema");
+const { Contact } = require("../models/contact");
 
-const { HttpError, cntrlWrapper } = require("../helpers/index");
+const { HttpError, ctrlWrapper } = require("../helpers/index");
 
 const getAll = async (req, res) => {
-  const result = await Contact.find();
+  const { _id: owner } = req.user;
+
+  const { page = 1, limit = 20 } = req.query;
+  const skip = (page - 1) * limit;
+
+  const result = await Contact.find({ owner }, "", {
+    skip,
+    limit,
+  });
 
   res.status(200).json(result);
 };
 
-const getById = async (req, res, next) => {
+const getById = async (req, res) => {
   const { contactId } = req.params;
   const result = await Contact.findById(contactId);
 
@@ -19,13 +27,19 @@ const getById = async (req, res, next) => {
   res.status(200).json(result);
 };
 
-const add = async (req, res, next) => {
-  const results = await Contact.create(req.body);
+const add = async (req, res) => {
+  const { email } = req.body;
+  const user = await Contact.findOne({ email });
+  if (user) {
+    throw HttpError(409, "Email in use");
+  }
 
+  const { _id: owner } = req.user;
+  const results = await Contact.create({ ...req.body, owner });
   res.status(201).json(results);
 };
 
-const updateById = async (req, res, next) => {
+const updateById = async (req, res) => {
   const body = req.body;
   const { contactId } = req.params;
 
@@ -39,7 +53,7 @@ const updateById = async (req, res, next) => {
   res.json(result);
 };
 
-const updateFavorite = async (req, res, next) => {
+const updateFavorite = async (req, res) => {
   const body = req.body;
   const { contactId } = req.params;
 
@@ -53,7 +67,7 @@ const updateFavorite = async (req, res, next) => {
   res.json(result);
 };
 
-const deleteById = async (req, res, next) => {
+const deleteById = async (req, res) => {
   const { contactId } = req.params;
   const result = await Contact.findByIdAndDelete(contactId);
 
@@ -67,10 +81,10 @@ const deleteById = async (req, res, next) => {
 };
 
 module.exports = {
-  getAll: cntrlWrapper(getAll),
-  getById: cntrlWrapper(getById),
-  add: cntrlWrapper(add),
-  updateById: cntrlWrapper(updateById),
-  updateFavorite: cntrlWrapper(updateFavorite),
-  deleteById: cntrlWrapper(deleteById),
+  getAll: ctrlWrapper(getAll),
+  getById: ctrlWrapper(getById),
+  add: ctrlWrapper(add),
+  updateById: ctrlWrapper(updateById),
+  updateFavorite: ctrlWrapper(updateFavorite),
+  deleteById: ctrlWrapper(deleteById),
 };
