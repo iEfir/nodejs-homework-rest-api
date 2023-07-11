@@ -2,22 +2,22 @@ const nodemailer = require("nodemailer");
 
 require("dotenv").config();
 
-const { MAIL_PASSWORD } = process.env;
+const { UKR_NET_EMAIL, UKR_NET_PASSWORD } = process.env;
 
 const config = {
-  host: "smtp.meta.ua",
+  host: "smtp.ukr.net",
   port: 465,
   secure: true,
   auth: {
-    user: "mailformail969@meta.ua",
-    pass: MAIL_PASSWORD,
+    user: UKR_NET_EMAIL,
+    pass: UKR_NET_PASSWORD,
   },
 };
 
 const transporter = nodemailer.createTransport(config);
 
 const sendEmail = async (data) => {
-  const email = { ...data };
+  const email = { ...data, from: UKR_NET_EMAIL };
   await transporter.sendMail(email);
   return true;
 };

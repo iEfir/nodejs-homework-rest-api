@@ -70,7 +70,8 @@ const verifyEmail = async (req, res) => {
 
 const resendVerifyEmail = async (req, res) => {
   const { email } = req.body;
-  const user = User.findOne({ email });
+  const user = await User.findOne({ email });
+
   if (!user) {
     throw HttpError();
   }
@@ -80,7 +81,6 @@ const resendVerifyEmail = async (req, res) => {
   }
 
   const verifyEmail = {
-    from: "mailformail969@meta.ua",
     to: email,
     subject: "Verify email",
     html: `<a target="_blank" href="${BASE_URL}/users/verify/${user.verificationToken}">Click verify email</a>`,
